@@ -70,7 +70,11 @@ vb_approx = function(mark_dat) {
   return(vb_res)
 }
 
-mcmc_fit = function(mark_dat) {
+mcmc_fit = function(mark_dat,
+                    iter = 2000,
+                    warmup = 500,
+                    cores = 3,
+                    chains = 3) {
   data_list = list(N = nrow(mark_dat),
                    case_counts = mark_dat$case,
                    ctrl_counts = mark_dat$ctrl)
