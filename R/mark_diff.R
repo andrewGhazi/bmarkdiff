@@ -204,8 +204,8 @@ stan_to_tibble = function(stan_res){
 
   par_names = names(res)
 
-  map2(res,
+  purrr::map2(res,
        par_names,
        res_to_df) %>%
-    bind_cols
+    dplyr::bind_cols
 }
