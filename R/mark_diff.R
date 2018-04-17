@@ -120,8 +120,8 @@ prior_to_post = function(prior,
            case_b = case_b + n_case - case_count,
            ctrl_a = ctrl_a + ctrl_count,
            ctrl_b = ctrl_b + n_ctrl - ctrl_count,
-           case_p = map2_dbl(case_a, case_b, ~rbeta(1, .x, .y)),
-           ctrl_p = map2_dbl(ctrl_a, ctrl_b, ~rbeta(1, .x, .y)),
+           case_p = purrr::map2_dbl(case_a, case_b, ~rbeta(1, .x, .y)),
+           ctrl_p = purrr::map2_dbl(ctrl_a, ctrl_b, ~rbeta(1, .x, .y)),
            case_ctrl_diff = case_p - ctrl_p)
 }
 
