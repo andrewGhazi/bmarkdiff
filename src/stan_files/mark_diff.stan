@@ -1,5 +1,7 @@
 data {
   int<lower=0> N; // number of regions
+  int<lower=0> n_ctrl;
+  int<lower=0> n_case;
   int<lower=0> case_counts[N];
   int<lower=0> ctrl_counts[N];
 }
@@ -18,8 +20,8 @@ model {
   case_b ~ gamma(20, 20);
   ctrl_p ~ beta(ctrl_a, ctrl_b);
   case_p ~ beta(case_a, case_b);
-  case_counts ~ binomial(12, case_p);
-  ctrl_counts ~ binomial(12, ctrl_p);
+  case_counts ~ binomial(n_case, case_p);
+  ctrl_counts ~ binomial(n_ctrl, ctrl_p);
 }
 generated quantities {
   vector[N] case_ctrl_diff;
