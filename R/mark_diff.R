@@ -54,17 +54,10 @@ estimate_joint_prior = function(input,
   }
 
 
-  use_model1 = TRUE
   if (use_vb){
     model_res = vb_approx(region_samp)
-  } else if(use_model1){
-    model_res = fit_model1(region_samp,
-                            n_iter = n_iter,
-                            n_cores = n_cores,
-                            n_chains = n_chains,
-                            n_warmup = n_warmup)
   } else {
-    model_res = fit_model2(region_samp,
+    model_res = fit_model(region_samp,
                             n_iter = n_iter,
                             n_cores = n_cores,
                             n_chains = n_chains,
@@ -143,7 +136,7 @@ vb_approx = function(mark_dat) {
   return(vb_res)
 }
 
-fit_model1 = function(mark_dat,
+fit_model = function(mark_dat,
                       n_iter = 3834,
                       n_cores = 1,
                       n_chains = 3,
@@ -161,29 +154,6 @@ fit_model1 = function(mark_dat,
                       cores = n_cores,
                       control = list(max_treedepth = 15),
                       pars = c('case_a', 'case_b', 'ctrl_a', 'ctrl_b'),
-                      include = TRUE)
-
-  return(mcmc_res)
-}
-
-fit_model2 = function(mark_dat,
-                      n_iter = 3834,
-                      n_cores = 1,
-                      n_chains = 3,
-                      n_warmup = 500) {
-
-  data_list = list(N = nrow(mark_dat),
-                   case_counts = mark_dat$case,
-                   ctrl_counts = mark_dat$ctrl)
-
-  mcmc_res = rstan::sampling(stanmodels$mark_diff2,
-                      data = data_list,
-                      chains = n_chains,
-                      iter = n_iter,
-                      warmup = n_warmup,
-                      cores = n_cores,
-                      control = list(max_treedepth = 15),
-                      pars = c('a', 'b'),
                       include = TRUE)
 
   return(mcmc_res)
