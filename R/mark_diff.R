@@ -23,7 +23,7 @@ estimate_joint_prior = function(input,
                                 n_iter = 3834,
                                 use_vb = TRUE,
                                 use_subsamp = TRUE,
-                                n_subsamp = 500,
+                                n_subsamp = 1000,
                                 n_cores = 1,
                                 n_chains = 3,
                                 n_warmup = 500,
@@ -33,7 +33,7 @@ estimate_joint_prior = function(input,
                           col_names = FALSE) %>%
     purrr::set_names(c('region',
                        paste0('case_', 1:n_case),
-                       paste0('ctrl_', 1:(ncol(.) - 1 - n_case)))) %>%f
+                       paste0('ctrl_', 1:(ncol(.) - 1 - n_case)))) %>%
     tidyr::gather(subj, peak, -region) %>%
     dplyr::mutate(peak = peak > 0)
 
@@ -55,13 +55,17 @@ estimate_joint_prior = function(input,
 
 
   if (use_vb){
-    model_res = vb_approx(region_samp)
+    model_res = vb_approx(region_samp,
+                          n_case = n_case,
+                          n_ctrl = n_ctrl)
   } else {
     model_res = fit_model(region_samp,
-                            n_iter = n_iter,
-                            n_cores = n_cores,
-                            n_chains = n_chains,
-                            n_warmup = n_warmup)
+                          n_case = n_case,
+                          n_ctrl = n_ctrl,
+                          n_iter = n_iter,
+                          n_cores = n_cores,
+                          n_chains = n_chains,
+                          n_warmup = n_warmup)
   }
 
   proportion_prior = model_res %>%
@@ -80,14 +84,14 @@ estimate_joint_prior = function(input,
                                          n_ctrl = n_ctrl,
                                          n_case = n_case),
                   different_by_hdi = purrr::map_lgl(diff_post,
-                                            ~get_hdi_call(.x, hdi_content = hdi_content)))
+                                                    ~get_hdi_call(.x, hdi_content = hdi_content)))
 
   differentially_marked_regions = n_peaks %>%
     dplyr::left_join(outcome_df %>% dplyr::select(-diff_post), by = c('case', 'ctrl')) %>%
     dplyr::filter(different_by_hdi)
 
-  res = list(outcome_df,
-             differentially_marked_regions)
+  res = list(outcome_posteriors = outcome_df,
+             differentially_marked_regions = differentially_marked_regions)
 
   return(res)
 }
@@ -124,6 +128,8 @@ prior_to_post = function(prior,
 vb_approx = function(mark_dat) {
 
   data_list = list(N = nrow(mark_dat),
+                   n_ctrl = n_ctrl,
+                   n_case = n_case,
                    case_counts = mark_dat$case,
                    ctrl_counts = mark_dat$ctrl)
 
@@ -137,12 +143,16 @@ vb_approx = function(mark_dat) {
 }
 
 fit_model = function(mark_dat,
-                      n_iter = 3834,
-                      n_cores = 1,
-                      n_chains = 3,
-                      n_warmup = 500) {
+                     n_case,
+                     n_ctrl,
+                     n_iter = 3834,
+                     n_cores = 1,
+                     n_chains = 3,
+                     n_warmup = 500) {
 
   data_list = list(N = nrow(mark_dat),
+                   n_ctrl = n_ctrl,
+                   n_case = n_case,
                    case_counts = mark_dat$case,
                    ctrl_counts = mark_dat$ctrl)
 
@@ -177,5 +187,5 @@ stan_to_tibble = function(stan_res){
   purrr::map2(res,
        par_names,
        res_to_df) %>%
-    dplyr::bind_cols
+    dplyr::bind_cols()
 }
