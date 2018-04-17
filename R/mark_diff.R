@@ -147,14 +147,14 @@ fit_model = function(mark_dat,
                    ctrl_counts = mark_dat$ctrl)
 
   mcmc_res = rstan::sampling(stanmodels$mark_diff,
-                      data = data_list,
-                      chains = n_chains,
-                      iter = n_iter,
-                      warmup = n_warmup,
-                      cores = n_cores,
-                      control = list(max_treedepth = 15),
-                      pars = c('case_a', 'case_b', 'ctrl_a', 'ctrl_b'),
-                      include = TRUE)
+                             data = data_list,
+                             chains = n_chains,
+                             iter = n_iter,
+                             warmup = n_warmup,
+                             cores = n_cores,
+                             control = list(max_treedepth = 15),
+                             pars = c('case_a', 'case_b', 'ctrl_a', 'ctrl_b'),
+                             include = TRUE)
 
   return(mcmc_res)
 }
