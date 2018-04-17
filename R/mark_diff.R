@@ -7,17 +7,25 @@
 #'
 #' @param input character - path to an mark input file
 #' @param n_case integer - the number of columns (after the id column) that are cases. The remainder are considered controls.
+#' @param n_iter integer - number of posterior samples to draw
 #' @param use_vb logical - use a variational approximation
-#' @param iter integer - number of posterior samples to draw
+#' @param use_subsamp logical - use a random subsample of regions for speed
+#' @param n_subsamp logical - number of regions to subsample (if applicable)
+#' @param n_cores integer - number of cores to use when using multiple MCMC chains
+#' @param n_chains integer - number of MCMC chains
+#' @param n_warmup integer - number of MCMC warmup iterations to use#'
 #' @return a stanfit object containing the marginal joint prior on case_a, case_b, ctrl_a, and ctrl_b
 #' @importFrom magrittr %>%
 #' @export
 estimate_joint_prior = function(input,
                                 n_case = 12,
-                                iter = 2000,
+                                n_iter = 3834,
                                 use_vb = TRUE,
                                 use_subsamp = TRUE,
-                                n_subsamp = 1000) {
+                                n_subsamp = 1000,
+                                n_cores = 1,
+                                n_chains = 3,
+                                n_warmup = 500,) {
 
   calls = readr::read_tsv(input,
                           col_names = FALSE) %>%
@@ -46,7 +54,11 @@ estimate_joint_prior = function(input,
   if (use_vb){
     vb_approx(region_samp)
   } else {
-    mcmc_fit(region_samp)
+    mcmc_fit(region_samp,
+             n_iter = n_iter,
+             n_cores = n_cores,
+             n_chains = n_chains,
+             n_warmup = n_warmup)
   }
 
 }
@@ -61,7 +73,7 @@ vb_approx = function(mark_dat) {
                    case_counts = mark_dat$case,
                    ctrl_counts = mark_dat$ctrl)
 
-  vb_res = rstan::vb(object = stanDSO,
+  vb_res = rstan::vb(object = stanmodels$mark_diff,
                      data = data_list,
                      output_samples = 5000,
                      pars = c('case_a', 'case_b', 'ctrl_a', 'ctrl_b'),
@@ -71,21 +83,21 @@ vb_approx = function(mark_dat) {
 }
 
 mcmc_fit = function(mark_dat,
-                    iter = 2000,
-                    warmup = 500,
-                    cores = 3,
-                    chains = 3) {
+                    n_iter = 3834,
+                    n_cores = 1,
+                    n_chains = 3,
+                    n_warmup = 500) {
+
   data_list = list(N = nrow(mark_dat),
                    case_counts = mark_dat$case,
                    ctrl_counts = mark_dat$ctrl)
 
-  mcmc_res = sampling(stanDSO,
+  mcmc_res = sampling(stanmodels$mark_diff,
                       data = data_list,
-                      chains = 3,
-                      iter = 2000,
-                      warmup = 500,
-                      cores = 3,
-                      #open_progress = TRUE,
+                      chains = n_chains,
+                      iter = n_iter,
+                      warmup = n_warmup,
+                      cores = n_cores,
                       control = list(max_treedepth = 15),
                       pars = c('case_a', 'case_b', 'ctrl_a', 'ctrl_b'),
                       include = TRUE)
