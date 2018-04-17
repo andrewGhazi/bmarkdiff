@@ -71,7 +71,7 @@ estimate_joint_prior = function(input,
                             n_warmup = n_warmup)
   }
 
-  proportion_prior = model1_res %>%
+  proportion_prior = model_res %>%
     stan_to_tibble()
 
   # outcome_mat = matrix(rep(FALSE, n_ctrl*n_case), nrow = n_case, ncol = n_ctrl)
@@ -153,7 +153,7 @@ fit_model1 = function(mark_dat,
                    case_counts = mark_dat$case,
                    ctrl_counts = mark_dat$ctrl)
 
-  mcmc_res = sampling(stanmodels$mark_diff,
+  mcmc_res = rstan::sampling(stanmodels$mark_diff,
                       data = data_list,
                       chains = n_chains,
                       iter = n_iter,
@@ -176,7 +176,7 @@ fit_model2 = function(mark_dat,
                    case_counts = mark_dat$case,
                    ctrl_counts = mark_dat$ctrl)
 
-  mcmc_res = sampling(stanmodels$mark_diff2,
+  mcmc_res = rstan::sampling(stanmodels$mark_diff2,
                       data = data_list,
                       chains = n_chains,
                       iter = n_iter,
