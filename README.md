@@ -8,3 +8,7 @@ Running ChromHMM on tumor and normal samples, we get tens of thousands of genomi
 ## Motivation  
 
 We noticed that there's a global correlation of counts in the two groups. We want this to serve as a background empirical prior.
+
+## Model
+
+![Kruschke diagram](www/bmarkdiff_diagram.png)
