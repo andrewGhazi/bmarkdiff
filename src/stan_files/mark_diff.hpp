@@ -40,7 +40,7 @@ static int current_statement_begin__;
 stan::io::program_reader prog_reader__() {
     stan::io::program_reader reader;
     reader.add_event(0, 0, "start", "model_mark_diff");
-    reader.add_event(27, 27, "end", "model_mark_diff");
+    reader.add_event(29, 29, "end", "model_mark_diff");
     return reader;
 }
 
@@ -48,6 +48,8 @@ stan::io::program_reader prog_reader__() {
  class model_mark_diff : public prob_grad {
 private:
     int N;
+    int n_ctrl;
+    int n_case;
     vector<int> case_counts;
     vector<int> ctrl_counts;
 public:
@@ -91,6 +93,18 @@ public:
             pos__ = 0;
             N = vals_i__[pos__++];
             current_statement_begin__ = 3;
+            context__.validate_dims("data initialization", "n_ctrl", "int", context__.to_vec());
+            n_ctrl = int(0);
+            vals_i__ = context__.vals_i("n_ctrl");
+            pos__ = 0;
+            n_ctrl = vals_i__[pos__++];
+            current_statement_begin__ = 4;
+            context__.validate_dims("data initialization", "n_case", "int", context__.to_vec());
+            n_case = int(0);
+            vals_i__ = context__.vals_i("n_case");
+            pos__ = 0;
+            n_case = vals_i__[pos__++];
+            current_statement_begin__ = 5;
             validate_non_negative_index("case_counts", "N", N);
             context__.validate_dims("data initialization", "case_counts", "int", context__.to_vec(N));
             validate_non_negative_index("case_counts", "N", N);
@@ -101,7 +115,7 @@ public:
             for (size_t i_0__ = 0; i_0__ < case_counts_limit_0__; ++i_0__) {
                 case_counts[i_0__] = vals_i__[pos__++];
             }
-            current_statement_begin__ = 4;
+            current_statement_begin__ = 6;
             validate_non_negative_index("ctrl_counts", "N", N);
             context__.validate_dims("data initialization", "ctrl_counts", "int", context__.to_vec(N));
             validate_non_negative_index("ctrl_counts", "N", N);
@@ -117,10 +131,14 @@ public:
             current_statement_begin__ = 2;
             check_greater_or_equal(function__,"N",N,0);
             current_statement_begin__ = 3;
+            check_greater_or_equal(function__,"n_ctrl",n_ctrl,0);
+            current_statement_begin__ = 4;
+            check_greater_or_equal(function__,"n_case",n_case,0);
+            current_statement_begin__ = 5;
             for (int k0__ = 0; k0__ < N; ++k0__) {
                 check_greater_or_equal(function__,"case_counts[k0__]",case_counts[k0__],0);
             }
-            current_statement_begin__ = 4;
+            current_statement_begin__ = 6;
             for (int k0__ = 0; k0__ < N; ++k0__) {
                 check_greater_or_equal(function__,"ctrl_counts[k0__]",ctrl_counts[k0__],0);
             }
@@ -132,19 +150,19 @@ public:
             // validate, set parameter ranges
             num_params_r__ = 0U;
             param_ranges_i__.clear();
-            current_statement_begin__ = 7;
+            current_statement_begin__ = 9;
             validate_non_negative_index("case_p", "N", N);
             num_params_r__ += N;
-            current_statement_begin__ = 8;
+            current_statement_begin__ = 10;
             validate_non_negative_index("ctrl_p", "N", N);
             num_params_r__ += N;
-            current_statement_begin__ = 9;
-            ++num_params_r__;
-            current_statement_begin__ = 10;
-            ++num_params_r__;
             current_statement_begin__ = 11;
             ++num_params_r__;
             current_statement_begin__ = 12;
+            ++num_params_r__;
+            current_statement_begin__ = 13;
+            ++num_params_r__;
+            current_statement_begin__ = 14;
             ++num_params_r__;
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(e, current_statement_begin__, prog_reader__());
@@ -333,22 +351,22 @@ public:
 
             // model body
 
-            current_statement_begin__ = 15;
-            lp_accum__.add(gamma_log<propto__>(ctrl_a, 20, 20));
-            current_statement_begin__ = 16;
-            lp_accum__.add(gamma_log<propto__>(ctrl_b, 20, 20));
             current_statement_begin__ = 17;
-            lp_accum__.add(gamma_log<propto__>(case_a, 20, 20));
+            lp_accum__.add(gamma_log<propto__>(ctrl_a, 20, 20));
             current_statement_begin__ = 18;
-            lp_accum__.add(gamma_log<propto__>(case_b, 20, 20));
+            lp_accum__.add(gamma_log<propto__>(ctrl_b, 20, 20));
             current_statement_begin__ = 19;
-            lp_accum__.add(beta_log<propto__>(ctrl_p, ctrl_a, ctrl_b));
+            lp_accum__.add(gamma_log<propto__>(case_a, 20, 20));
             current_statement_begin__ = 20;
-            lp_accum__.add(beta_log<propto__>(case_p, case_a, case_b));
+            lp_accum__.add(gamma_log<propto__>(case_b, 20, 20));
             current_statement_begin__ = 21;
-            lp_accum__.add(binomial_log<propto__>(case_counts, 12, case_p));
+            lp_accum__.add(beta_log<propto__>(ctrl_p, ctrl_a, ctrl_b));
             current_statement_begin__ = 22;
-            lp_accum__.add(binomial_log<propto__>(ctrl_counts, 12, ctrl_p));
+            lp_accum__.add(beta_log<propto__>(case_p, case_a, case_b));
+            current_statement_begin__ = 23;
+            lp_accum__.add(binomial_log<propto__>(case_counts, n_case, case_p));
+            current_statement_begin__ = 24;
+            lp_accum__.add(binomial_log<propto__>(ctrl_counts, n_ctrl, ctrl_p));
 
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(e, current_statement_begin__, prog_reader__());
@@ -456,7 +474,7 @@ public:
 
             if (!include_gqs__) return;
             // declare and define generated quantities
-            current_statement_begin__ = 25;
+            current_statement_begin__ = 27;
             validate_non_negative_index("case_ctrl_diff", "N", N);
             vector_d case_ctrl_diff(static_cast<Eigen::VectorXd::Index>(N));
             (void) case_ctrl_diff;  // dummy to suppress unused var warning
@@ -465,11 +483,11 @@ public:
             stan::math::fill(case_ctrl_diff,DUMMY_VAR__);
 
 
-            current_statement_begin__ = 26;
+            current_statement_begin__ = 28;
             stan::math::assign(case_ctrl_diff, subtract(case_p,ctrl_p));
 
             // validate generated quantities
-            current_statement_begin__ = 25;
+            current_statement_begin__ = 27;
 
             // write generated quantities
             for (int k_0__ = 0; k_0__ < N; ++k_0__) {

@@ -57,7 +57,8 @@ estimate_joint_prior = function(input,
   if (use_vb){
     model_res = vb_approx(region_samp,
                           n_case = n_case,
-                          n_ctrl = n_ctrl)
+                          n_ctrl = n_ctrl,
+                          iter = n_iter * n_chains)
   } else {
     model_res = fit_model(region_samp,
                           n_case = n_case,
@@ -75,6 +76,7 @@ estimate_joint_prior = function(input,
   # colnames(outcome_mat) = as.character(1:n_ctrl)
   # rownames(outcome_mat) = as.character(1:n_case)
 
+
   outcome_df = expand.grid(0:n_ctrl, 0:n_case) %>%
     dplyr::as_tibble() %>%
     purrr::set_names('ctrl', 'case') %>%
@@ -90,7 +92,8 @@ estimate_joint_prior = function(input,
     dplyr::left_join(outcome_df %>% dplyr::select(-diff_post), by = c('case', 'ctrl')) %>%
     dplyr::filter(different_by_hdi)
 
-  res = list(outcome_posteriors = outcome_df,
+  res = list(joint_prior = proportion_prior,
+             outcome_posteriors = outcome_df,
              differentially_marked_regions = differentially_marked_regions)
 
   return(res)
@@ -125,7 +128,10 @@ prior_to_post = function(prior,
 #' Variational approximation of mark differences
 #'
 #' This functional uses \code{rstan::vb} to run a variational approximation on the probability
-vb_approx = function(mark_dat) {
+vb_approx = function(mark_dat,
+                     n_ctrl,
+                     n_case,
+                     iter) {
 
   data_list = list(N = nrow(mark_dat),
                    n_ctrl = n_ctrl,
@@ -137,7 +143,8 @@ vb_approx = function(mark_dat) {
                      data = data_list,
                      output_samples = 5000,
                      pars = c('case_a', 'case_b', 'ctrl_a', 'ctrl_b'),
-                     include = TRUE)
+                     include = TRUE,
+                     iter = iter)
 
   return(vb_res)
 }

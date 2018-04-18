@@ -4,7 +4,7 @@
 \alias{vb_approx}
 \title{Variational approximation of mark differences}
 \usage{
-vb_approx(mark_dat)
+vb_approx(mark_dat, n_ctrl, n_case, iter)
 }
 \description{
 This functional uses \code{rstan::vb} to run a variational approximation on the probability

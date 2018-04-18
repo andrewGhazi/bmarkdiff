@@ -4,17 +4,30 @@
 \alias{estimate_joint_prior}
 \title{Estimate the joint for a mark}
 \usage{
-estimate_joint_prior(input, n_case = 12, iter = 2000, use_vb = TRUE,
-  use_subsamp = TRUE, n_subsamp = 1000)
+estimate_joint_prior(input, n_case = 12, n_iter = 3834, use_vb = TRUE,
+  use_subsamp = TRUE, n_subsamp = 1000, n_cores = 1, n_chains = 3,
+  n_warmup = 500, hdi_content = 0.99)
 }
 \arguments{
 \item{input}{character - path to an mark input file}
 
 \item{n_case}{integer - the number of columns (after the id column) that are cases. The remainder are considered controls.}
 
-\item{iter}{integer - number of posterior samples to draw}
+\item{n_iter}{integer - number of posterior samples to draw}
 
 \item{use_vb}{logical - use a variational approximation}
+
+\item{use_subsamp}{logical - use a random subsample of regions for speed}
+
+\item{n_subsamp}{logical - number of regions to subsample (if applicable)}
+
+\item{n_cores}{integer - number of cores to use when using multiple MCMC chains}
+
+\item{n_chains}{integer - number of MCMC chains}
+
+\item{n_warmup}{integer - number of MCMC warmup iterations to use}
+
+\item{hdi_content}{real(0,1) - the posterior probability content to include in the posterior density interval cutoff used to make binary calls of differential marks}
 }
 \value{
 a stanfit object containing the marginal joint prior on case_a, case_b, ctrl_a, and ctrl_b
